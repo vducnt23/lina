@@ -7,13 +7,14 @@ import (
 
 type EbookRepository interface {
 	Save(ebook *models.Ebook) error
+	FindByASIN(asin string) (*models.Ebook, error)
 }
 
 type ebookRepoImpl struct {
 	db *gorm.DB
 }
 
-func NewEbookRepository(db *gorm.DB) EbookRepository {
+func newEbookRepository(db *gorm.DB) EbookRepository {
 	return &ebookRepoImpl{
 		db: db,
 	}
@@ -21,4 +22,10 @@ func NewEbookRepository(db *gorm.DB) EbookRepository {
 
 func (e *ebookRepoImpl) Save(ebook *models.Ebook) error {
 	return e.db.Save(ebook).Error
+}
+
+func (e *ebookRepoImpl) FindByASIN(asin string) (*models.Ebook, error) {
+	ebook := &models.Ebook{}
+	err := e.db.Model(&models.Ebook{}).Where("asin = ?", asin).First(ebook).Error
+	return ebook, err
 }
